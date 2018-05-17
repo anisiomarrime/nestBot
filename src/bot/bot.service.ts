@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 
-@Injectable()
+@Injectable()                                                                                                                                           
 export class BotService implements OnModuleInit {
 
     private oldText = "";
@@ -23,18 +23,24 @@ export class BotService implements OnModuleInit {
                 message = this.oldText + message;
             }
 
+            var options = {
+                reply_markup: JSON.stringify({
+                  inline_keyboard: [
+                    [{ text: 'Internet Banking', callback_data: "inbanking" }],
+                    [{ text: 'Empréstimo', callback_data: 'emprestimo' }],
+                    [{ text: 'Poupança', callback_data: 'poupanca' }]
+                  ]
+                })
+            };
+
             if (message.includes("ola") || message.includes("Boa tarde")) {
                 bot.sendMessage(msg.from.id, "Boa tarde " + msg.from.first_name + ", eu sou o robo da RPA Team do Telegram, Posso ajudá-lo com alguma coisa?");
-                
-                bot.sendMessage(msg.from.id, 'Hi, do you want to travel?', {
-                    reply_markup: { keyboard: [['trigger'], ['Internet Banking']] }
-                });
                 respondido = true
             }
 
             if (message.includes("esqueci senha") || message.includes("recuperar senha") || message.includes("recupear password")) {
                 if(message.includes("internet banking")){
-                    bot.sendMessage( msg.from.id, "Simples, primeiro entre na página do Barclays, de seguida procure o link IBANKING – FORGOT PASSWORD e siga as instruções :)" );   
+                    bot.sendMessage( msg.from.id, "Simples, primeiro entre na página do Barclays, de seguida procure o link IBANKING – FORGOT PASSWORD e siga as instruções :)");   
                     this.oldText = '';
                 }
                 else if(message.includes("cartao de debito")){
@@ -54,28 +60,44 @@ export class BotService implements OnModuleInit {
                 respondido = true
             }
             
-            if (message.includes("como para ceder ao inbanking?") || message.includes("inbanking")) {
+            if (message.includes("Como aceder o serviço inbanking?") || message.includes("inbanking")) {
                 bot.sendMessage(msg.from.id, "podes aceder usado o link http://barclays.co.mz");
                 bot.sendMessage(msg.from.id, "tem que fazer o pré-registo online na página do Barclays,");
                 respondido = true
             }
 
-            if (message.includes("para qual fim foi o debito feito na minha conta?")) {
-                bot.sendMessage(msg.from.id, "Pagamento de CC/ Pagamento de Loan/ cobrança de cheque,");
-                bot.sendMessage(msg.from.id, "Porem tabem podes verificar os meios de subscricao assim assim ! certo ?");
-                respondido = true
-            }
-
-            if (message.includes("efectuei o pagamento")) {
-                bot.sendMessage(msg.from.id, "Os pagamentos de cc no Ibanking leva 24h para estar disponivel o valor no cc.");
-                respondido = true
-            }
-
             if(!respondido && message != '/start'){
                 bot.sendMessage(msg.from.id, "Desculpa " + msg.from.first_name + " não percebi ?");
+                bot.sendMessage(msg.from.id, "Podemos interagir consoante estes pontos: ", options);
             }
 
+            if(message == '/start') bot.sendMessage(msg.from.id, "Olá " + msg.from.first_name + ", eu sou o robo da RPA Team do Telegram, Posso ajudá-lo com alguma coisa?", options);
+
             console.log(msg.from.first_name + ": " + msg.text)
+        });
+        
+        // Inline button callback queries
+        bot.on('callback_query', function (msg) {
+            if(msg.data.includes("inbanking")){
+                bot.answerCallbackQuery(msg.id, 'Internet Banking');
+                bot.sendMessage(msg.from.id, "Para acederes o serviço Internet Banking, tem que fazer o pré-registo online na página do Barclays,");
+                bot.sendMessage(msg.from.id, "para tal podes aceder usado o link http://barclays.co.mz");
+                bot.sendMessage(msg.from.id, "fácil nao é ?");
+            }
+
+            if(msg.data.includes("emprestimo")){
+                bot.answerCallbackQuery(msg.id, 'Empréstimo');
+                bot.sendMessage(msg.from.id, "Para acederes o serviço Internet Banking, tem que fazer o pré-registo online na página do Barclays,");
+                bot.sendMessage(msg.from.id, "para tal podes aceder usado o link http://barclays.co.mz");
+                bot.sendMessage(msg.from.id, "fácil nao é ?");
+            }
+
+            if(msg.data.includes("poupanca")){
+                bot.answerCallbackQuery(msg.id, 'Poupança');
+                bot.sendMessage(msg.from.id, "Para acederes o serviço Internet Banking, tem que fazer o pré-registo online na página do Barclays,");
+                bot.sendMessage(msg.from.id, "para tal podes aceder usado o link http://barclays.co.mz");
+                bot.sendMessage(msg.from.id, "fácil nao é ?");
+            }
         });
     }
 }
